@@ -36,7 +36,7 @@ make build   Build the container
 make up      Build and start the container
 make down    Stop and remove the container
 make ssh     SSH into the container
-make clean   Remove container and image
+make clean   Remove container, image, and SSH keys
 make help    Show all commands
 ```
 
@@ -50,11 +50,13 @@ Every restart is a fresh environment — nothing persists.
 
 ## SSH key
 
-The compose file mounts `~/.ssh/id_ed25519.pub` for SSH access. If your key is different (e.g. `id_rsa.pub`), update the volume mount in `docker-compose.yml`:
+A project-local SSH keypair is generated automatically on first `make up` (stored in `.ssh/`, gitignored). No setup needed — it just works.
 
-```yaml
-volumes:
-  - ~/.ssh/id_rsa.pub:/tmp/authorized_keys:ro
+To regenerate the key:
+
+```bash
+make clean   # removes keys and container
+make up      # generates a fresh key and starts the container
 ```
 
 ## Private marketplace repos
