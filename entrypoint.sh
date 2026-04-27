@@ -14,6 +14,15 @@ if [ -f /tmp/authorized_keys ]; then
     echo "✓ SSH keys configured"
 fi
 
+# Create keyring initialization script for SSH login sessions
+cat > /etc/profile.d/keyring.sh << 'KEYRING'
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+    eval $(dbus-launch --sh-syntax)
+    eval $(echo '' | gnome-keyring-daemon --unlock --components=secrets 2>/dev/null)
+fi
+KEYRING
+chmod +x /etc/profile.d/keyring.sh
+
 echo "✓ SSH server starting on port 22"
 echo "  Connect with: ssh -p 2222 dev@localhost"
 

@@ -12,6 +12,7 @@ Ephemeral Docker container for testing GitHub Copilot CLI in a clean environment
 - GitHub CLI (`gh`)
 - Neovim + LazyVim (arm64/amd64 auto-detected)
 - GitHub Copilot CLI
+- gnome-keyring (encrypted credential storage — no plain text tokens)
 - SSH server (key-based auth only, no password, non-root `dev` user)
 
 ## Quick start
@@ -20,14 +21,17 @@ Ephemeral Docker container for testing GitHub Copilot CLI in a clean environment
 make up    # Build and start the container
 make ssh   # SSH in
 
-# Inside the container — authenticate and go
-echo "ghp_your_token" | gh auth login --with-token
-gh auth setup-git   # critical: sets gh as git credential helper for private repos
-gh auth status      # verify auth
+# Inside the container — authenticate GitHub CLI
+gh auth login          # interactive OAuth device flow
+gh auth setup-git      # sets gh as git credential helper for private repos
+gh auth status         # verify auth
 
-# Launch Copilot CLI
+# Launch Copilot CLI (uses its own OAuth device flow for multi-org support)
 copilot
 ```
+
+> **Note:** Credentials are stored in `gnome-keyring` (encrypted, in-memory).
+> No plain text config files. Everything is destroyed when the container stops.
 
 ## Commands
 
@@ -77,3 +81,5 @@ Your fine-grained PAT also needs access to the private repos you're adding as ma
 - SSH is bound to `127.0.0.1:2222` only (not exposed to network)
 - The `dev` user has passwordless sudo
 - Container runs with `init: true` for proper signal handling
+- `gh` tokens are stored in gnome-keyring (encrypted, in-memory) — not in plain text
+- Copilot CLI uses OAuth device flow and supports authenticating to multiple orgs
