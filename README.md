@@ -1,9 +1,9 @@
 # copilot-sandbox
-Ephemeral Docker container for testing GitHub Copilot CLI in a clean environment.
+Ephemeral Docker container for demoing and testing GitHub Copilot CLI over SSH.
 
 ## Why
 
-`docker exec -it` creates a layered pseudo-TTY that breaks interactive prompts in Copilot CLI (e.g. `/plugin marketplace add` freezes the container). This setup uses SSH instead, which allocates a proper PTY and makes everything work as expected.
+Spin up a clean, disposable environment that simulates a real SSH workflow — perfect for quick demos and testing. The container provides a proper PTY over SSH (unlike `docker exec -it`, which breaks interactive prompts), resets to a blank slate on every restart, and takes seconds to launch.
 
 ## What's included
 
