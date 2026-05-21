@@ -9,19 +9,22 @@ $(SSH_KEY):
 	@echo "✓ SSH keypair generated at $(SSH_KEY)"
 
 build: ## Build the container
-	docker compose build
+	container-compose build
 
 up: $(SSH_KEY) ## Build and start the container
-	docker compose up -d --build
+	# Work around a bug https://github.com/Mcrich23/Container-Compose/issues/93
+	# container-compose up -d --build 
+	container run -d --name copilot-cli -p 2222:22  -v ./.ssh/copilot-sandbox.pub:/tmp/authorized_keys:ro -c 2 -m 2G copilot-cli
 
 down: ## Stop and remove the container
-	docker compose down
+	container-compose down
 
 ssh: ## SSH into the container
 	ssh -p 2222 -i $(SSH_KEY) -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null dev@localhost
 
 clean: ## Remove container, image, and SSH keys
-	docker compose down --rmi local
+	container-compose down
+	container rm copilot-cli
 	rm -rf $(SSH_KEY_DIR)
 
 help: ## Show this help

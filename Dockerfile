@@ -44,7 +44,7 @@ RUN useradd -m -s /bin/bash -G sudo dev && \
 
 # SSH authorized_keys directory
 USER dev
-RUN mkdir -p ~/.ssh && chmod 700 ~/.ssh
+RUN mkdir -p ~/.ssh && chmod 700 ~/.ssh && mkdir ~/code
 
 USER root
 
