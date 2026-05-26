@@ -22,10 +22,12 @@ down: ## Stop and remove the container
 ssh: ## SSH into the container
 	ssh -p 2222 -i $(SSH_KEY) -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null dev@localhost
 
-clean: ## Remove container, image, and SSH keys
-	container-compose down
-	#container rm copilot-cli
+clean: down ## Remove container, image, and SSH keys
+	# container rm copilot-cli
 	rm -rf $(SSH_KEY_DIR)
+	
+ls: ## List all containers 
+	container ls --all
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
