@@ -1,6 +1,11 @@
 services:
   copilot-cli:
-    build: .
+    build:
+      context: .
+      args:
+        - HTTP_PROXY
+        - HTTPS_PROXY
+        - NO_PROXY
     container_name: copilot-cli
     init: true
     ssh: true

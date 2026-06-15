@@ -4,8 +4,14 @@ FROM ghcr.io/cli/cli:latest AS gh-cli
 FROM ubuntu:24.04
 
 ARG TARGETARCH
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    HTTP_PROXY=${HTTP_PROXY} \
+    HTTPS_PROXY=${HTTPS_PROXY} \
+    NO_PROXY=${NO_PROXY}
 
 # Core tools
 RUN apt-get update && apt-get upgrade -y
