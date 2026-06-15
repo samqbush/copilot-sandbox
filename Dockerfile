@@ -1,5 +1,4 @@
 FROM node:22-slim AS node
-FROM ghcr.io/cli/cli:latest AS gh-cli
 
 FROM ubuntu:24.04
 
@@ -35,8 +34,15 @@ COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm /usr/local/bin/npm \
     && ln -sf /usr/local/lib/node_modules/npm/bin/npx /usr/local/bin/npx
 
-# GitHub CLI (copied from official gh image)
-COPY --from=gh-cli /usr/local/bin/gh /usr/local/bin/gh
+# GitHub CLI
+RUN mkdir -p -m 755 /etc/apt/keyrings \
+    && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+       | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+    && chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+       | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+    && apt-get update && apt-get install -y gh \
+    && rm -rf /var/lib/apt/lists/*
 
 # Codex CLI
 RUN npm install -g @openai/codex
