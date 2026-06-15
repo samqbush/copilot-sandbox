@@ -58,10 +58,9 @@ RUN mkdir -p /run/sshd && \
 RUN useradd -m -s /bin/bash -G sudo dev && \
     echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/dev
 
-# SSH authorized_keys directory + Copilot CLI extension (gh extensions are per-user)
+# SSH authorized_keys directory
 USER dev
-RUN mkdir -p ~/.ssh && chmod 700 ~/.ssh && mkdir ~/code \
-    && gh extension install github/gh-copilot
+RUN mkdir -p ~/.ssh && chmod 700 ~/.ssh && mkdir ~/code
 
 USER root
 
