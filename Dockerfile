@@ -34,8 +34,11 @@ RUN mkdir -p -m 755 /etc/apt/keyrings \
 RUN curl -fsSL https://gh.io/copilot-install | bash
 
 # Node.js (required for Codex CLI)
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y nodejs \
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+       | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" \
+       | tee /etc/apt/sources.list.d/nodesource.list > /dev/null \
+    && apt-get update && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Codex CLI
