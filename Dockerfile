@@ -1,3 +1,5 @@
+FROM node:22-slim AS node
+
 FROM ubuntu:24.04
 
 ARG TARGETARCH
@@ -5,7 +7,7 @@ ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Core tools
-RUN apt-get update && apt-get upgrade -y 
+RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y --no-install-recommends \
     git curl wget ca-certificates openssh-server \
     ripgrep fd-find sudo locales \
@@ -20,6 +22,12 @@ ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 # fd-find installs as fdfind on Ubuntu
 RUN ln -s $(which fdfind) /usr/local/bin/fd
 
+# Node.js (copied from official node image)
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/bin/npm /usr/local/bin/npm
+COPY --from=node /usr/local/bin/npx /usr/local/bin/npx
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+
 # GitHub CLI
 RUN mkdir -p -m 755 /etc/apt/keyrings \
     && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg \
@@ -28,14 +36,6 @@ RUN mkdir -p -m 755 /etc/apt/keyrings \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
        | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
     && apt-get update && apt-get install -y gh \
-    && rm -rf /var/lib/apt/lists/*
-
-# Node.js (required for Codex CLI)
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
-       | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" \
-       | tee /etc/apt/sources.list.d/nodesource.list > /dev/null \
-    && apt-get update && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Codex CLI
