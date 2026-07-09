@@ -36,13 +36,41 @@ copilot
 ## Commands
 
 ```
-make build   Build the container
-make up      Build and start the container
-make down    Stop and remove the container
-make ssh     SSH into the container
-make clean   Remove container, image, and SSH keys
-make help    Show all commands
+make build    Build the container image
+make up       Start a sandbox
+make down     Stop and remove a sandbox
+make down-all Stop and remove ALL sandboxes (running or stopped)
+make ssh      SSH into a sandbox
+make ps       List all running sandboxes
+make prune    Reclaim Docker disk space
+make clean    Remove container, image, and SSH keys
+make help     Show all commands
 ```
+
+> **Note:** `make up` no longer rebuilds the image every time. The image is
+> built automatically on first run; after changing the `Dockerfile`, run
+> `make build` to pick up the changes. This keeps Docker from accumulating
+> build cache on every start (see [Troubleshooting](#troubleshooting-disk-full)).
+
+## Running multiple sandboxes
+
+Each sandbox is identified by an instance number `N` (default `1`). Pass `N` to
+any command to spin up and manage isolated sandboxes side by side — each gets its
+own Compose project, container, network, and host port (`2221 + N`):
+
+```bash
+make up  N=1    # sandbox 1 on port 2222
+make up  N=2    # sandbox 2 on port 2223
+make up  N=3    # sandbox 3 on port 2224
+
+make ssh  N=2   # SSH into sandbox 2
+make down N=2   # tear down just sandbox 2
+make down-all   # tear down every sandbox at once
+make ps         # list every running sandbox
+```
+
+Omitting `N` targets sandbox 1, so the classic `make up` / `make ssh` still work.
+The auto-generated SSH keypair is shared across all instances.
 
 ## Tear down
 
@@ -76,9 +104,29 @@ git config --global --list | grep cred
 
 Your fine-grained PAT also needs access to the private repos you're adding as marketplaces.
 
+## Troubleshooting: disk full
+
+If `make up` or a build fails with `no space left on device`, the culprit is
+almost always Docker's own disk — **not** your checked-out projects. Docker
+Desktop stores every image, container layer, volume, and build cache in a single
+shared VM disk (~64 GB by default). Running several sandboxes and rebuilding
+images over time fills it up silently.
+
+Reclaim space with the built-in targets:
+
+```bash
+make down-all   # stop every sandbox (running or stopped)
+make prune      # remove dangling images, stopped containers, and build cache
+```
+
+`make prune` wraps `docker system prune -f`. It does **not** touch named volumes
+or unrelated running containers. For a deeper clean (including unused images and
+volumes), run `docker system prune -a --volumes` manually — but note that
+affects all of Docker, not just this project.
+
 ## Notes
 
-- SSH is bound to `127.0.0.1:2222` only (not exposed to network)
+- SSH is bound to `127.0.0.1:2222` only (not exposed to network); additional sandboxes use `2223`, `2224`, … (`2221 + N`)
 - The `dev` user has passwordless sudo
 - Container runs with `init: true` for proper signal handling
 - `gh` tokens are stored in gnome-keyring (encrypted, in-memory) — not in plain text
