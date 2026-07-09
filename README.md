@@ -36,15 +36,21 @@ copilot
 ## Commands
 
 ```
-make build   Build the container
-make up      Build and start a sandbox
-make down    Stop and remove a sandbox
+make build    Build the container image
+make up       Start a sandbox
+make down     Stop and remove a sandbox
 make down-all Stop and remove ALL running sandboxes
-make ssh     SSH into a sandbox
-make ps      List all running sandboxes
-make clean   Remove container, image, and SSH keys
-make help    Show all commands
+make ssh      SSH into a sandbox
+make ps       List all running sandboxes
+make prune    Reclaim Docker disk space
+make clean    Remove container, image, and SSH keys
+make help     Show all commands
 ```
+
+> **Note:** `make up` no longer rebuilds the image every time. The image is
+> built automatically on first run; after changing the `Dockerfile`, run
+> `make build` to pick up the changes. This keeps Docker from accumulating
+> build cache on every start (see [Troubleshooting](#troubleshooting-disk-full)).
 
 ## Running multiple sandboxes
 
@@ -97,6 +103,26 @@ git config --global --list | grep cred
 ```
 
 Your fine-grained PAT also needs access to the private repos you're adding as marketplaces.
+
+## Troubleshooting: disk full
+
+If `make up` or a build fails with `no space left on device`, the culprit is
+almost always Docker's own disk — **not** your checked-out projects. Docker
+Desktop stores every image, container layer, volume, and build cache in a single
+shared VM disk (~64 GB by default). Running several sandboxes and rebuilding
+images over time fills it up silently.
+
+Reclaim space with the built-in targets:
+
+```bash
+make down-all   # stop every running sandbox
+make prune      # remove dangling images, stopped containers, and build cache
+```
+
+`make prune` wraps `docker system prune -f`. It does **not** touch named volumes
+or unrelated running containers. For a deeper clean (including unused images and
+volumes), run `docker system prune -a --volumes` manually — but note that
+affects all of Docker, not just this project.
 
 ## Notes
 

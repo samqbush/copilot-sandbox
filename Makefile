@@ -13,7 +13,7 @@ PROJECT := copilot-sandbox-$(N)
 # project (isolated container/network/volumes) and its own host port.
 COMPOSE := COMPOSE_PROJECT_NAME=$(PROJECT) SANDBOX_PORT=$(PORT) docker compose
 
-.PHONY: build up down ssh ps clean help down-all
+.PHONY: build up down ssh ps clean help down-all prune
 
 $(SSH_KEY):
 	@mkdir -p $(SSH_KEY_DIR)
@@ -23,8 +23,8 @@ $(SSH_KEY):
 build: ## Build the container
 	$(COMPOSE) build
 
-up: $(SSH_KEY) ## Build and start a sandbox (set N for multiple, e.g. make up N=2)
-	$(COMPOSE) up -d --build
+up: $(SSH_KEY) ## Start a sandbox (set N for multiple, e.g. make up N=2)
+	$(COMPOSE) up -d
 	@echo "✓ Sandbox '$(PROJECT)' up — SSH with: make ssh N=$(N)  (port $(PORT))"
 
 down: ## Stop and remove a sandbox (set N to target one, e.g. make down N=2)
@@ -51,6 +51,9 @@ ps: ## List all running sandboxes
 clean: ## Remove a sandbox's container/image (set N), then remove SSH keys
 	$(COMPOSE) down --rmi local
 	rm -rf $(SSH_KEY_DIR)
+
+prune: ## Reclaim Docker disk space (dangling images, stopped containers, build cache)
+	docker system prune -f
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
