@@ -37,12 +37,34 @@ copilot
 
 ```
 make build   Build the container
-make up      Build and start the container
-make down    Stop and remove the container
-make ssh     SSH into the container
+make up      Build and start a sandbox
+make down    Stop and remove a sandbox
+make down-all Stop and remove ALL running sandboxes
+make ssh     SSH into a sandbox
+make ps      List all running sandboxes
 make clean   Remove container, image, and SSH keys
 make help    Show all commands
 ```
+
+## Running multiple sandboxes
+
+Each sandbox is identified by an instance number `N` (default `1`). Pass `N` to
+any command to spin up and manage isolated sandboxes side by side — each gets its
+own Compose project, container, network, and host port (`2221 + N`):
+
+```bash
+make up  N=1    # sandbox 1 on port 2222
+make up  N=2    # sandbox 2 on port 2223
+make up  N=3    # sandbox 3 on port 2224
+
+make ssh  N=2   # SSH into sandbox 2
+make down N=2   # tear down just sandbox 2
+make down-all   # tear down every sandbox at once
+make ps         # list every running sandbox
+```
+
+Omitting `N` targets sandbox 1, so the classic `make up` / `make ssh` still work.
+The auto-generated SSH keypair is shared across all instances.
 
 ## Tear down
 
@@ -78,7 +100,7 @@ Your fine-grained PAT also needs access to the private repos you're adding as ma
 
 ## Notes
 
-- SSH is bound to `127.0.0.1:2222` only (not exposed to network)
+- SSH is bound to `127.0.0.1:2222` only (not exposed to network); additional sandboxes use `2223`, `2224`, … (`2221 + N`)
 - The `dev` user has passwordless sudo
 - Container runs with `init: true` for proper signal handling
 - `gh` tokens are stored in gnome-keyring (encrypted, in-memory) — not in plain text

@@ -1,10 +1,9 @@
 services:
   copilot-cli:
     build: .
-    container_name: copilot-cli
     init: true
     ports:
-      - "127.0.0.1:2222:22"
+      - "127.0.0.1:${SANDBOX_PORT:-2222}:22"
     volumes:
       # Mount the auto-generated SSH public key for auth
       - ./.ssh/copilot-sandbox.pub:/tmp/authorized_keys:ro
