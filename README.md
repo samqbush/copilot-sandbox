@@ -39,7 +39,7 @@ copilot
 make build    Build the container image
 make up       Start a sandbox
 make down     Stop and remove a sandbox
-make down-all Stop and remove ALL running sandboxes
+make down-all Stop and remove ALL sandboxes (running or stopped)
 make ssh      SSH into a sandbox
 make ps       List all running sandboxes
 make prune    Reclaim Docker disk space
@@ -115,7 +115,7 @@ images over time fills it up silently.
 Reclaim space with the built-in targets:
 
 ```bash
-make down-all   # stop every running sandbox
+make down-all   # stop every sandbox (running or stopped)
 make prune      # remove dangling images, stopped containers, and build cache
 ```
 

@@ -30,11 +30,11 @@ up: $(SSH_KEY) ## Start a sandbox (set N for multiple, e.g. make up N=2)
 down: ## Stop and remove a sandbox (set N to target one, e.g. make down N=2)
 	$(COMPOSE) down
 
-down-all: ## Stop and remove ALL running sandboxes
+down-all: ## Stop and remove ALL sandboxes (running or stopped)
 	@projects=$$(docker ps -a --filter "name=copilot-sandbox-" \
-	    --format '{{.Label "com.docker.compose.project"}}' | sort -u); \
+	    --format '{{.Label "com.docker.compose.project"}}' | grep -v '^$$' | sort -u); \
 	if [ -z "$$projects" ]; then \
-	    echo "No sandboxes running."; \
+	    echo "No sandboxes found."; \
 	else \
 	    for p in $$projects; do \
 	        echo "→ Stopping $$p"; \
