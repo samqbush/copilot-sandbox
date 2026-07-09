@@ -54,6 +54,9 @@ RUN useradd -m -s /bin/bash -G sudo dev && \
 USER dev
 RUN git clone https://github.com/LazyVim/starter ~/.config/nvim
 
+# Handy aliases
+RUN echo "alias yolo='copilot --yolo'" >> ~/.bash_aliases
+
 # SSH authorized_keys directory
 RUN mkdir -p ~/.ssh && chmod 700 ~/.ssh
 
